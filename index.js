@@ -1,22 +1,22 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const registerRoutes = require('./routes/register'); // Import your register routes
+const registerRoutes = require('./routes/register');
+const authRoutes = require('./routes/auth');
+const connectDB = require('./config/db');
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000; // Port to run the server on
+const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(express.json()); // For parsing application/json
-app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI) // Removed deprecated options
+connectDB()
     .then(() => {
-        console.log('MongoDB connected...');
-        // Start the server only after a successful DB connection
         app.listen(PORT, () => {
             console.log(`Server running at http://localhost:${PORT}/`);
         });
@@ -31,9 +31,10 @@ app.get('/', (req, res) => {
 });
 
 // Routes
-app.use('/api/register', registerRoutes); // Register your routes
+app.use('/api/register', registerRoutes);
+app.use('/api/auth', authRoutes);
 
 // Catch-all route for 404
-app.get('*', (req, res) => {
+app.use((req, res) => {
     res.status(404).send('Not Found');
 });

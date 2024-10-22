@@ -1,6 +1,7 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const router = express.Router();
-const User = require('../models/users'); // Ensure this path is correct
+const User = require('../models/users');
 
 // @route   POST api/register
 // @desc    Register user
@@ -8,20 +9,18 @@ const User = require('../models/users'); // Ensure this path is correct
 router.post('/', async (req, res) => {
     const { email, password, role } = req.body;
 
-    // Validation
     if (!email || !password || !role) {
         return res.status(400).json({ msg: 'Please enter all fields' });
     }
 
     try {
-        // Check if user exists
         let user = await User.findOne({ email });
         if (user) {
             return res.status(400).json({ msg: 'User already exists' });
         }
 
-        // Create a new user
-        user = new User({ email, password, role });
+        const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
+        user = new User({ email, password: hashedPassword, role });
         await user.save();
 
         res.status(201).json({ msg: 'User registered successfully' });
