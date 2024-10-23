@@ -2,10 +2,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const registerRoutes = require('./routes/register');
-const authRoutes = require('./routes/auth'); // Add this line
+const authRoutes = require('./routes/auth'); 
 const mentorRoutes = require('./routes/mentor');
 const mentorsRoutes = require('./routes/mentors');
-const dashboardRoutes = require('./routes/dashboard'); // Import the dashboard routes
+const dashboardRoutes = require('./routes/dashboard'); 
 const connectDB = require('./config/db');
 const path = require('path');
 
