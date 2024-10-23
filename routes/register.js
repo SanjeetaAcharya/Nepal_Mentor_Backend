@@ -3,14 +3,12 @@ const bcrypt = require('bcryptjs');
 const router = express.Router();
 const User = require('../models/users');
 
-// @route   POST api/register
-// @desc    Register user
-// @access  Public
-router.post('/', async (req, res) => {
-    const { email, password, role } = req.body;
+// Mentee Registration
+router.post('/mentee', async (req, res) => {
+    const { firstName, lastName, email, password, age, institution, location } = req.body;
 
-    if (!email || !password || !role) {
-        return res.status(400).json({ msg: 'Please enter all fields' });
+    if (!firstName || !lastName || !email || !password) {
+        return res.status(400).json({ msg: 'Please enter all required fields' });
     }
 
     try {
@@ -19,11 +17,57 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ msg: 'User already exists' });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
-        user = new User({ email, password: hashedPassword, role });
-        await user.save();
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({
+            firstName,
+            lastName,
+            email,
+            password: hashedPassword,
+            role: 'mentee',
+            age,
+            institution,
+            location,
+        });
 
-        res.status(201).json({ msg: 'User registered successfully' });
+        await newUser.save();
+        res.status(201).json({ msg: 'Mentee registered successfully' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// Mentor Registration
+router.post('/mentor', async (req, res) => {
+    const { firstName, lastName, email, password, location, qualifications, skills, jobTitle, category, bio } = req.body;
+
+    if (!firstName || !lastName || !email || !password || !location || !qualifications || !skills || !jobTitle || !category) {
+        return res.status(400).json({ msg: 'Please enter all required fields' });
+    }
+
+    try {
+        let user = await User.findOne({ email });
+        if (user) {
+            return res.status(400).json({ msg: 'User already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({
+            firstName,
+            lastName,
+            email,
+            password: hashedPassword,
+            role: 'mentor',
+            location,
+            qualifications,
+            skills,
+            jobTitle,
+            category,
+            bio,
+        });
+
+        await newUser.save();
+        res.status(201).json({ msg: 'Mentor registered successfully' });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
