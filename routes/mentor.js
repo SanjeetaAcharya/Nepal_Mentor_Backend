@@ -87,7 +87,7 @@ router.post('/complete', [auth, upload.single('profileImage')], async (req, res)
 
 // @route   GET /api/mentor/profile/:id
 // @desc    Get Mentor Profile by ID
-// @access  Public
+// @access  Publicc
 router.get('/profile/:id', async (req, res) => {
   try {
     const mentorProfile = await MentorProfile.findOne({ user: req.params.id }).populate('user', ['email', 'role']);
