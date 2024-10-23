@@ -1,21 +1,64 @@
 const mongoose = require('mongoose');
 
-// Define user schema for mentor/mentee
 const UserSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  role: {
-    type: String,
-    enum: ['mentee', 'mentor'],
-    required: true
-  },
+    firstName: {
+        type: String,
+        required: true
+    },
+    lastName: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    role: {
+        type: String,
+        enum: ['mentor', 'mentee'],
+        required: true
+    },
+    location: {
+        type: String,
+        default: null
+    },
+    qualifications: {
+        type: String,
+        default: null
+    },
+    skills: {
+        type: String,
+        default: null
+    },
+    jobTitle: {
+        type: String,
+        default: null
+    },
+    category: {
+        type: String,
+        default: null
+    },
+    bio: {
+        type: String,
+        default: null
+    },
+    age: {
+        type: Number,
+        default: null
+    },
+    institution: {
+        type: String,
+        default: null
+    },
+    date: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 module.exports = mongoose.model('User', UserSchema);
