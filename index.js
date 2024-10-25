@@ -1,11 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const cors = require('cors'); // Import CORS
 const registerRoutes = require('./routes/register');
-const authRoutes = require('./routes/auth'); 
+const authRoutes = require('./routes/auth');
 const mentorRoutes = require('./routes/mentor');
 const mentorsRoutes = require('./routes/mentors');
-const dashboardRoutes = require('./routes/dashboard'); 
+const dashboardRoutes = require('./routes/dashboard');
 const connectDB = require('./config/db');
 const path = require('path');
 
@@ -15,6 +16,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
+app.use(cors()); // Use the CORS middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -39,10 +41,10 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/register', registerRoutes);
-app.use('/api/auth', authRoutes); // Ensure this line is present
+app.use('/api/auth', authRoutes); 
 app.use('/api/mentor', mentorRoutes);
 app.use('/api/mentors', mentorsRoutes);
-app.use('/api/dashboard', dashboardRoutes); // Include dashboard routes
+app.use('/api/dashboard', dashboardRoutes);
 
 // Catch-all route for 404
 app.use((req, res) => {
