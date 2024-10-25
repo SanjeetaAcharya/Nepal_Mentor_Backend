@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/users'); // Ensure this line is correct
+const User = require('../models/users'); //should match to the model name 
 const router = express.Router();
 
 // POST /api/auth/login - Login Route

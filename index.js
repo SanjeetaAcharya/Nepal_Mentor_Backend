@@ -11,6 +11,7 @@ const path = require('path');
 
 dotenv.config();
 
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -48,3 +49,4 @@ app.use('/api/dashboard', dashboardRoutes); // Include dashboard routes
 app.use((req, res) => {
     res.status(404).send('Not Found');
 });
+
