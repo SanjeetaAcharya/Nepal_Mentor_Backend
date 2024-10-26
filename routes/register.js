@@ -47,6 +47,7 @@ router.post('/mentee', async (req, res) => {
             return res.status(400).json({ msg: 'User already exists' });
         }
 
+        //Hash password and create new user
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             firstName,
@@ -58,9 +59,9 @@ router.post('/mentee', async (req, res) => {
             institution,
             location,
         });
-        
-
         await newUser.save();
+
+        //Send registration email
         sendRegistrationEmail(email, firstName);
         res.status(201).json({ msg: 'Mentee registered successfully' });
     } catch (err) {
