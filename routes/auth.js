@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const User = require('../models/users');
+const authMiddleware = require('../middleware/auth');
 const router = express.Router();
 
 // POST /api/auth/login - Login Route
@@ -38,6 +39,9 @@ router.post('/login', async (req, res) => {
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
 
+  // Log the incoming request
+  console.log('Forgot password request received:', req.body); // Log the email,only for testing .
+
   try {
     // Check if user exists
     const user = await User.findOne({ email });
@@ -61,7 +65,12 @@ router.post('/forgot-password', async (req, res) => {
     });
 
     // Construct reset URL
+    //console.log('CLIENT_URL:', process.env.CLIENT_URL); only for testing
     const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+    //console.log('Reset URL:', resetUrl); // Log the complete URL for testing
+
+    
+
     const mailOptions = {
       to: user.email,
       subject: 'Password Reset',
@@ -105,5 +114,11 @@ router.post('/reset-password/:token', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+
+
+
+
+
 
 module.exports = router;

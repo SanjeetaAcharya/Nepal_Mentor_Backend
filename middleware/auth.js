@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 
+// Middleware for logging requests and verifying JWT
 module.exports = function (req, res, next) {
+  // Log incoming requests
+  console.log(`${req.method} request for '${req.url}'`);
+
   // Get token from the header
   const token = req.header('x-auth-token');
 

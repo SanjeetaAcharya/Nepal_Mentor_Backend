@@ -58,6 +58,7 @@ router.post('/mentee', async (req, res) => {
             institution,
             location,
         });
+        
 
         await newUser.save();
         sendRegistrationEmail(email, firstName);
