@@ -1,23 +1,26 @@
+// index.js
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const cors = require('cors'); // Import CORS
+const cors = require('cors');
+const path = require('path');
+const connectDB = require('./config/db');
+
+// Routes
 const registerRoutes = require('./routes/register');
 const authRoutes = require('./routes/auth');
 const mentorRoutes = require('./routes/mentor');
 const mentorsRoutes = require('./routes/mentors');
 const dashboardRoutes = require('./routes/dashboard');
-const connectDB = require('./config/db');
-const path = require('path');
+const adminRoutes = require('./routes/admin'); // Make sure this is exported correctly from the 'admin.js' file
 
 dotenv.config();
-
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors()); // Use the CORS middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -42,13 +45,15 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/register', registerRoutes);
-app.use('/api/auth', authRoutes); 
+app.use('/api/auth', authRoutes);
 app.use('/api/mentor', mentorRoutes);
 app.use('/api/mentors', mentorsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/admin', adminRoutes); // Ensure adminRoutes is set up correctly
 
-// Catch-all route for 404
+// Catch-all route for 404 - keeps other routes unaffected
 app.use((req, res) => {
     res.status(404).send('Not Found');
 });
 
+module.exports = app;
