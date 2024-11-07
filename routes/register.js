@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
 const User = require('../models/users');
+const MentorProfile = require('../models/mentorProfile');
 const nodemailer = require('nodemailer');
 
 // transporter for sending emails
@@ -14,6 +15,7 @@ const transporter = nodemailer.createTransport({
         pass: 'cydhqbwotkocyuyz'  // password (from .env)
     }
 });
+
 
 // Function to send email after registration
 function sendRegistrationEmail(userEmail, firstName) {
@@ -47,7 +49,6 @@ router.post('/mentee', async (req, res) => {
             return res.status(400).json({ msg: 'User already exists' });
         }
 
-        //Hash password and create new user
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             firstName,
@@ -59,9 +60,9 @@ router.post('/mentee', async (req, res) => {
             institution,
             location,
         });
-        await newUser.save();
+        
 
-        //Send registration email
+        await newUser.save();
         sendRegistrationEmail(email, firstName);
         res.status(201).json({ msg: 'Mentee registered successfully' });
     } catch (err) {
@@ -72,9 +73,9 @@ router.post('/mentee', async (req, res) => {
 
 // Mentor Registration
 router.post('/mentor', async (req, res) => {
-    const { firstName, lastName, email, password, location, qualifications, skills, jobTitle, category, bio } = req.body;
+    const { firstName, lastName, email, password, location, qualifications, skills, jobTitle, category, bio,subjects, classLevel } = req.body;
 
-    if (!firstName || !lastName || !email || !password || !location || !qualifications || !skills || !jobTitle || !category) {
+    if (!firstName || !lastName || !email || !password || !location || !qualifications || !skills || !jobTitle || !category || !classLevel || !subjects) {
         return res.status(400).json({ msg: 'Please enter all required fields' });
     }
 
@@ -99,7 +100,25 @@ router.post('/mentor', async (req, res) => {
             bio,
         });
 
+
         await newUser.save();
+
+
+          //  mentor profile with classLevel and subjects
+          const mentorProfile = new MentorProfile({
+            user: newUser._id, // Reference to the User document
+            location,
+            qualifications,
+            skills,
+            jobTitle,
+            category,
+            bio,
+            classLevel, // New field
+            subjects, // New field
+        });
+
+        await mentorProfile.save();
+
         sendRegistrationEmail(email, firstName); // Send registration email to the mentor
         res.status(201).json({ msg: 'Mentor registered successfully' });
     } catch (err) {
@@ -107,7 +126,6 @@ router.post('/mentor', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
 
 
 //testing for mail,only for testing 
@@ -131,3 +149,4 @@ const testMail = async () => {
 // testMail();
 
 module.exports = router;
+
