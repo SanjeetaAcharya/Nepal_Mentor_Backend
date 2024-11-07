@@ -55,6 +55,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    classLevel: { 
+        type: String 
+    },  // Added classLevel field
+    subjects: [{ type: String }], 
     date: {
         type: Date,
         default: Date.now

@@ -3,15 +3,22 @@ const MentorProfile = require('../models/mentorProfile');
 const router = express.Router();
 
 // @route   GET /api/mentors
-// @desc    Get all mentors or filter by category
+// @desc    Get mentors filtered by category and subject
 // @access  Public
 router.get('/', async (req, res) => {
-  const { category } = req.query;
+  const { category, subject } = req.query;
   
   try {
     let query = {};
+
+    // Filter by category (educational level)
     if (category) {
       query.category = category;
+    }
+
+    // Filter by subject
+    if (subject) {
+      query.subjects = subject;  // Assuming 'subjects' is the field storing subjects in MentorProfile model
     }
 
     const mentors = await MentorProfile.find(query).populate('user', ['email', 'role']);
