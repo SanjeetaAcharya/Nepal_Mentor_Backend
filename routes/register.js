@@ -107,6 +107,8 @@ router.post('/mentor', async (req, res) => {
           //  mentor profile with classLevel and subjects
           const mentorProfile = new MentorProfile({
             user: newUser._id, // Reference to the User document
+            firstName,
+            lastName,
             location,
             qualifications,
             skills,

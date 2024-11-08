@@ -8,6 +8,15 @@ const mentorProfileSchema = new Schema({
         ref: 'User',
         required: true
     },
+
+    firstName: {
+        type: String,
+        required: true
+    },
+    lastName: {
+        type: String,
+        required: true
+    },
     location: {
         type: String,
         required: true
