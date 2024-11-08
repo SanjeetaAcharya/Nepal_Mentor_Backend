@@ -29,23 +29,29 @@ router.get('/', async (req, res) => {
   }
 });
 
-// @route   GET /api/mentors/:id
-// @desc    Get Mentor by ID
+// @route   GET /api/mentors/:userId
+// @desc    Get mentor profile by user's _id or mentor's _id
 // @access  Public
-router.get('/:id', async (req, res) => {
+router.get('/:userId', async (req, res) => {
   try {
-    const mentor = await MentorProfile.findOne({ user: req.params.id }).populate('user', ['email', 'role']);
+    // First, try finding the mentor using the 'user' field (mentor with 'user' object)
+    let mentor = await MentorProfile.findOne({ 'user': req.params.userId }).populate('user', ['email', 'role']);
+
+    // If not found, try finding the mentor using mentor's own '_id' field (mentor without 'user' object)
+    if (!mentor) {
+      mentor = await MentorProfile.findOne({ _id: req.params.userId }).populate('user', ['email', 'role']);
+    }
+
     if (!mentor) {
       return res.status(404).json({ msg: 'Mentor not found' });
     }
+
     res.json(mentor);
   } catch (err) {
     console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Mentor not found' });
-    }
     res.status(500).send('Server error');
   }
 });
+
 
 module.exports = router;
