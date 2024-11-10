@@ -43,6 +43,10 @@ const mentorProfileSchema = new Schema({
     },
     classLevel: { type: String, required: true },
     subjects: [{ type: String, required: true }],
+
+    
 });
+
+
 
 module.exports = mongoose.model('MentorProfile', mentorProfileSchema);

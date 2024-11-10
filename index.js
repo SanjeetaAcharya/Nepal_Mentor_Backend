@@ -13,6 +13,8 @@ const mentorRoutes = require('./routes/mentor');
 const mentorsRoutes = require('./routes/mentors');
 const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin'); // Make sure this is exported correctly from the 'admin.js' file
+const availabilityRoutes = require('./routes/availability');
+
 
 dotenv.config();
 
@@ -50,6 +52,8 @@ app.use('/api/mentor', mentorRoutes);
 app.use('/api/mentors', mentorsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/admin', adminRoutes); // Ensure adminRoutes is set up correctly
+app.use('/api/availability', availabilityRoutes);
+
 
 // Catch-all route for 404 - keeps other routes unaffected
 app.use((req, res) => {
