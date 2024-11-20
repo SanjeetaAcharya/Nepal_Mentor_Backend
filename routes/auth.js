@@ -1,9 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const User = require('../models/users');
-const authMiddleware = require('../middleware/auth');
 const router = express.Router();
 
 // POST /api/auth/login - Login Route
@@ -27,98 +25,18 @@ router.post('/login', async (req, res) => {
     const payload = { user: { id: user.id, role: user.role } };
     jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
       if (err) throw err;
-      res.json({ token });
+
+      // Send both token and userId in the response
+      res.json({
+        token,
+        userId: user.id,  // Include userId in the response
+        role: user.role    // Optionally include the role for further use
+      });
     });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 });
-
-// POST /api/auth/forgot-password - Request password reset
-router.post('/forgot-password', async (req, res) => {
-  const { email } = req.body;
-
-  // Log the incoming request
-  console.log('Forgot password request received:', req.body); // Log the email,only for testing .
-
-  try {
-    // Check if user exists
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ msg: 'User with this email does not exist' });
-    }
-
-    // Create a reset token (JWT)
-    const payload = { user: { id: user.id } };
-    const resetToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });
-
-    // Set up Nodemailer
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: 'nepalmentors1@gmail.com',
-        pass: 'cydhqbwotkocyuyz'
-      }
-    });
-
-    // Construct reset URL
-    //console.log('CLIENT_URL:', process.env.CLIENT_URL); only for testing
-    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
-    //console.log('Reset URL:', resetUrl); // Log the complete URL for testing
-
-    
-
-    const mailOptions = {
-      to: user.email,
-      subject: 'Password Reset',
-      text: `You requested a password reset. Click the following link to reset your password: ${resetUrl}`
-    };
-
-    // Send the email
-    await transporter.sendMail(mailOptions);
-    res.json({ msg: 'Password reset link sent to your email' });
-
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
-
-// POST /api/auth/reset-password/:token - Reset the password
-router.post('/reset-password/:token', async (req, res) => {
-  const { password } = req.body;
-
-  try {
-    // Verify the token
-    const decoded = jwt.verify(req.params.token, process.env.JWT_SECRET);
-    const userId = decoded.user.id;
-
-    // Find the user by ID
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(400).json({ msg: 'Invalid token or user does not exist' });
-    }
-
-    // Hash the new password
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
-
-    await user.save();
-    res.json({ msg: 'Password has been reset successfully' });
-
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
-
-
-
-
-
-
 
 module.exports = router;

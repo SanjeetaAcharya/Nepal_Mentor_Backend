@@ -35,6 +35,8 @@ function sendRegistrationEmail(userEmail, firstName) {
     });
 }
 
+
+
 // Mentee Registration
 router.post('/mentee', async (req, res) => {
     const { firstName, lastName, email, password, age, institution, location } = req.body;
@@ -98,6 +100,8 @@ router.post('/mentor', async (req, res) => {
             jobTitle,
             category,
             bio,
+            classLevel,
+            subjects,
         });
 
 

@@ -1,11 +1,13 @@
 // models/availability.js
 
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const AvailabilitySchema = new mongoose.Schema({
-    mentor: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'MentorProfile', // or 'User' if you prefer
+
+const AvailabilitySchema = new Schema({
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User', // or 'User'
         required: true
     },
     slots: {
@@ -13,5 +15,8 @@ const AvailabilitySchema = new mongoose.Schema({
         default: []
     }
 }, { timestamps: true });
+
+
+
 
 module.exports = mongoose.model('Availability', AvailabilitySchema);
