@@ -6,9 +6,10 @@ const auth = require('../middleware/auth');
 
 // Mentor Profile Completion or Update API (including availability)
 router.post('/complete', auth, async (req, res) => {
-  const { firstName, lastName, location, jobTitle, company, category, skills, bio, linkedin, availability } = req.body;
+  console.log('Received Request Body:', req.body);// new line added
+  const { firstName, lastName, location, jobTitle, company, category, skills, bio, linkedin, availability, qualification } = req.body;
 
-  if (!firstName || !lastName || !location || !jobTitle || !category || !skills || !bio || !availability) {
+  if (!firstName || !lastName || !location || !jobTitle || !category || !skills || !bio || !availability || !qualification) {
     return res.status(400).json({ msg: 'Please enter all required fields' });
   }
 
@@ -36,7 +37,8 @@ router.post('/complete', auth, async (req, res) => {
       skills: skills.split(',').map(skill => skill.trim()), // Convert comma-separated skills to array
       bio,
       linkedin,
-      availability,  // Include availability directly
+      availability, 
+      qualification, 
     });
 
     await mentorProfile.save();
@@ -49,7 +51,7 @@ router.post('/complete', auth, async (req, res) => {
 
 // Mentor Profile Update API (including availability)
 router.put('/profile/:id', auth, async (req, res) => {
-  const { firstName, lastName, location, jobTitle, company, category, skills, bio, linkedin, availability } = req.body;
+  const { firstName, lastName, location, jobTitle, company, category, skills, bio, linkedin, availability, qualifications } = req.body;
 
   const mentorFields = {};
   if (firstName) mentorFields.firstName = firstName;
@@ -61,7 +63,8 @@ router.put('/profile/:id', auth, async (req, res) => {
   if (skills) mentorFields.skills = skills.split(',').map(skill => skill.trim());
   if (bio) mentorFields.bio = bio;
   if (linkedin) mentorFields.linkedin = linkedin;
-  if (availability) mentorFields.availability = availability;  // Update availability field
+  if (availability) mentorFields.availability = availability;
+  if (qualification) mentorFields.qualification = qualification;  
 
   try {
     const user = await User.findById(req.user.id);
@@ -92,3 +95,4 @@ router.put('/profile/:id', auth, async (req, res) => {
 });
 
 module.exports = router;
+

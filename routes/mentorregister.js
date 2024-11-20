@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
 const User = require('../models/users');
+const MentorProfile = require('../models/mentorProfile');
 const nodemailer = require('nodemailer');
 
 // transporter for sending emails
@@ -33,11 +34,12 @@ function sendRegistrationEmail(userEmail, firstName) {
     });
 }
 
-// Mentee Registration
-router.post('/mentee', async (req, res) => {
-    const { firstName, lastName, email, password, age, institution, location } = req.body;
+// Mentor Registration
+router.post('/mentor', async (req, res) => {
+    console.log('Received Request Body:', req.body);
+    const { firstName, lastName, email, password, location, qualifications, skills, jobTitle, category, bio, classLevel, subjects } = req.body;
 
-    if (!firstName || !lastName || !email || !password || !age || !institution || !location) {
+    if (!firstName || !lastName || !email || !password || !location || !qualifications || !skills || !jobTitle || !category || !classLevel || !subjects) {
         return res.status(400).json({ msg: 'Please enter all required fields' });
     }
 
@@ -53,15 +55,38 @@ router.post('/mentee', async (req, res) => {
             lastName,
             email,
             password: hashedPassword,
-            role: 'mentee',
-            age,
-            institution,
+            role: 'mentor',
             location,
+            qualifications,
+            skills,
+            jobTitle,
+            category,
+            bio,
+            classLevel,
+            subjects,
         });
 
         await newUser.save();
-        sendRegistrationEmail(email, firstName);
-        res.status(201).json({ msg: 'Mentee registered successfully' });
+
+        // Mentor profile with additional details
+        const mentorProfile = new MentorProfile({
+            user: newUser._id, // Reference to the User document
+            firstName,
+            lastName,
+            location,
+            qualifications,
+            skills,
+            jobTitle,
+            category,
+            bio,
+            classLevel,
+            subjects,
+        });
+
+        await mentorProfile.save();
+
+        sendRegistrationEmail(email, firstName); // Send registration email to the mentor
+        res.status(201).json({ msg: 'Mentor registered successfully' });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');

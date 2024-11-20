@@ -8,11 +8,12 @@ const connectDB = require('./config/db');
 
 // Routes
 const registerRoutes = require('./routes/register');
+const mentorregisterRoutes = require('./routes/mentorregister');
 const authRoutes = require('./routes/auth');
 const mentorRoutes = require('./routes/mentor');
 const mentorsRoutes = require('./routes/mentors');
 const dashboardRoutes = require('./routes/dashboard');
-const adminRoutes = require('./routes/admin'); // Make sure this is exported correctly from the 'admin.js' file
+const adminRoutes = require('./routes/admin'); 
 const availabilityRoutes = require('./routes/availability');
 
 
@@ -47,6 +48,7 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/register', registerRoutes);
+app.use('/api/mentorregister', mentorregisterRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/mentor', mentorRoutes);
 app.use('/api/mentors', mentorsRoutes);
@@ -61,3 +63,4 @@ app.use((req, res) => {
 });
 
 module.exports = app;
+
