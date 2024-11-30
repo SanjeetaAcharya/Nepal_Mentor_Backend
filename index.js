@@ -15,6 +15,7 @@ const mentorsRoutes = require('./routes/mentors');
 const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin'); 
 const availabilityRoutes = require('./routes/availability');
+const requestRoutes= require('./routes/requests');
 
 
 dotenv.config();
@@ -26,6 +27,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/api/requests', requestRoutes);
 
 // Serve static files (for profile images)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -51,7 +53,7 @@ app.use('/api/register', registerRoutes);
 app.use('/api/mentorregister', mentorregisterRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/mentor', mentorRoutes);
-app.use('/api/mentors', mentorsRoutes);
+app.use('/api/mentors', mentorsRoutes);  // Make sure the new POST route for mentee requests is included here
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/admin', adminRoutes); // Ensure adminRoutes is set up correctly
 app.use('/api/availability', availabilityRoutes);
@@ -63,4 +65,3 @@ app.use((req, res) => {
 });
 
 module.exports = app;
-

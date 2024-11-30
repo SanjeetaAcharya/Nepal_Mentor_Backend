@@ -230,7 +230,7 @@ const isSlotTaken = async (userId, slot) => {
 // Helper function to validate the time range format (example: "9:00 PM - 10:00 PM")
 const isValidTimeSlot = (slot) => {
   // Regex to match time range format: "9:00 PM - 10:00 PM"
-  const timeSlotRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9] (AM|PM) - (0?[1-9]|1[0-2]):[0-5][0-9] (AM|PM)$/;
+  const timeSlotRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9] ([APap][Mm]|[APap]\.M|[APap]\.M\.)\s*-\s*(0?[1-9]|1[0-2]):[0-5][0-9] ([APap][Mm]|[APap]\.M|[APap]\.M\.)$/;
   return timeSlotRegex.test(slot);
 };
 
