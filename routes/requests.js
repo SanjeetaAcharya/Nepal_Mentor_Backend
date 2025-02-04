@@ -3,15 +3,17 @@ const mongoose = require('mongoose');
 const Request = require('../models/request'); // Request schema
 const User = require('../models/users'); // User schema
 const router = express.Router();
+const Notification = require('../models/notification');
+const { sendNotificationToMentee } = require('../socket');
 
 // POST /api/requests: Create a new request
 router.post('/', async (req, res) => {
-  const { mentor, userId } = req.body;
+  const { mentor, userId, slot } = req.body;
 
   try {
     // Validate input
-    if (!mentor || !userId) {
-      return res.status(400).json({ error: 'Mentor ID and User ID are required' });
+    if (!mentor || !userId || !slot) {
+      return res.status(400).json({ error: 'Mentor ID, User ID, and complete Slot information are required' });
     }
 
     // Convert to ObjectId format
@@ -45,6 +47,7 @@ router.post('/', async (req, res) => {
     const newRequest = new Request({
       mentee: menteeId,
       mentor: mentorId,
+      slot: slot, // Store the complete slot information here
       status: 'pending', // Default status
     });
 
@@ -112,6 +115,25 @@ router.get('/mentor', async (req, res) => {
   }
 });
 
+// GET /api/requests/notifications/:userId - Fetch notifications for a specific user
+router.get('/notifications/:userId', async (req, res) => {
+  try {
+      const { userId } = req.params;
+      const notifications = await Notification.find({ user: userId }).sort({ createdAt: -1 });
+
+      if (!notifications.length) {
+          return res.status(404).json({ message: 'No notifications found' });
+      }
+
+      res.json(notifications);
+  } catch (error) {
+      console.error('Error fetching notifications:', error);
+      res.status(500).json({ error: 'Failed to fetch notifications' });
+  }
+});
+
+
+
 // PATCH /api/requests/:id: Update the status of a request
 router.patch('/:id', async (req, res) => {
   const { id } = req.params;
@@ -123,11 +145,13 @@ router.patch('/:id', async (req, res) => {
       return res.status(400).json({ error: 'Status must be either "accepted" or "rejected"' });
     }
 
-    const request = await Request.findById(id);
-    if (!request) {
-      return res.status(404).json({ error: 'Request not found' });
-    }
-
+   // Find the request and populate related mentor and mentee details
+   const request = await Request.findById(id)
+   .populate('mentor')  // To access mentor's firstName and lastName
+   .populate('mentee'); // To access mentee's _id for notification
+ if (!request) {
+   return res.status(404).json({ error: 'Request not found' });
+ }
     // Ensure that the request is not already in the final status (accepted or rejected)
     if (request.status !== 'pending') {
       return res.status(400).json({ error: 'Request has already been processed (accepted or rejected)' });
@@ -138,6 +162,28 @@ router.patch('/:id', async (req, res) => {
     request.updatedAt = Date.now(); // Update the timestamp
 
     await request.save();
+
+    // If accepted, create a notification and send it via WebSocket
+    if (status === 'accepted') {
+      const mentorName = `${request.mentor.firstName} ${request.mentor.lastName}`;
+      const notificationMessage = `Your request has been accepted by mentor ${mentorName}.`;
+
+      // Create and save the notification document
+      const notification = new Notification({
+        user: request.mentee._id, // Use the mentee's ID from the request
+        message: notificationMessage,
+      });
+      
+      console.log('Attempting to save notification:', notification); // Debug log
+      try {
+        await notification.save();
+        console.log('Notification saved successfully:', notification); // Debug log
+      } catch (error) {
+        console.error('Error saving notification:', error); // Debug log
+      }
+    
+      sendNotificationToMentee(request.mentee._id.toString(), notificationMessage);
+    } 
 
     res.status(200).json(request);
   } catch (err) {

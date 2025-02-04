@@ -1,4 +1,16 @@
 const mongoose = require('mongoose');
+// Define the socialLinks sub-schema
+const SocialLinkSchema = new mongoose.Schema({
+    platform: {
+        type: String,
+        required: true
+    },
+    link: {
+        type: String,
+        required: true
+    }
+}, { _id: false }); // Disable _id for socialLinks
+
 
 const UserSchema = new mongoose.Schema({
     firstName: {
@@ -56,13 +68,35 @@ const UserSchema = new mongoose.Schema({
         default: null
     },
     classLevel: { 
-        type: String 
-    },  // Added classLevel field
-    subjects: [{ type: String }], 
+        type: String,
+        required: function() {
+            return this.role === 'mentor';
+        }
+    },   
+    subjects: [{ 
+        type: String,
+        required: true
+    }], 
+    fieldOfStudy: { type: String }, // New field for Bachelors/Masters
+    socialLinks: [SocialLinkSchema], // Use the sub-schema for socialLinks
+    profilePicture: {
+        type: String,
+        default: '/uploads/profilePictures/default.png'
+    },
+    certificates: [{
+        type: String,
+        default: []
+    }], 
     date: {
         type: Date,
         default: Date.now
     }
+});
+
+// Pre-save middleware to set fullName
+UserSchema.pre('save', function(next) {
+    this.fullName = `${this.firstName} ${this.lastName}`;
+    next();
 });
 
 module.exports = mongoose.model('User', UserSchema);

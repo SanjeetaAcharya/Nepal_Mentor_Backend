@@ -1,5 +1,9 @@
 const express = require('express');
-const User = require('../models/users'); 
+const User = require('../models/users');
+const Request = require('../models/request');
+const Notification = require('../models/notification');
+const Review = require('../models/review');
+
 const router = express.Router();
 
 // Route to get all mentors
@@ -25,83 +29,50 @@ router.get('/mentees', async (req, res) => {
 // Route to get user details by ID
 router.get('/users/:id', async (req, res) => {
     try {
-        const userId = req.params.id; // Get the ID from the URL
-        const user = await User.findById(userId); // Find user by ID
-        
+        const userId = req.params.id;
+        const user = await User.findById(userId);
+
         if (!user) {
-            return res.status(404).send("User not found"); // If no user is found, send a 404 error
+            return res.status(404).send("User not found");
         }
 
-        res.json(user); // Send back the user's details
+        res.json(user);
     } catch (error) {
-        res.status(500).send("Error retrieving user"); // If there's an error, send a 500 status
+        res.status(500).send("Error retrieving user");
     }
 });
 
 // Route to delete user by ID
 router.delete('/users/:id', async (req, res) => {
     try {
-        const userId = req.params.id; // Get the ID from the URL
-
-        const deletedUser = await User.findByIdAndDelete(userId); // Delete the user
+        const userId = req.params.id;
+        const deletedUser = await User.findByIdAndDelete(userId);
 
         if (!deletedUser) {
-            return res.status(404).send("User not found"); // If no user is found, send a 404 error
+            return res.status(404).send("User not found");
         }
 
-        res.send("User deleted successfully"); // Send back a success message
+        res.send("User deleted successfully");
     } catch (error) {
-        res.status(500).send("Error deleting user"); // If there's an error, send a 500 status
-    }
-});
-
-// Route to view all info of a mentor by ID
-router.get('/mentors/:id', async (req, res) => {
-    try {
-        const mentorId = req.params.id;
-        const mentor = await User.findById(mentorId);
-
-        if (!mentor || mentor.role !== 'mentor') {
-            return res.status(404).send("Mentor not found");
-        }
-
-        res.json(mentor);
-    } catch (error) {
-        res.status(500).send("Error retrieving mentor");
-    }
-});
-
-// Route to view all info of a mentee by ID
-router.get('/mentees/:id', async (req, res) => {
-    try {
-        const menteeId = req.params.id;
-        const mentee = await User.findById(menteeId);
-
-        if (!mentee || mentee.role !== 'mentee') {
-            return res.status(404).send("Mentee not found");
-        }
-
-        res.json(mentee);
-    } catch (error) {
-        res.status(500).send("Error retrieving mentee");
+        res.status(500).send("Error deleting user");
     }
 });
 
 // Route to update user by ID
 router.put('/users/:id', async (req, res) => {
     try {
-        const userId = req.params.id; // Get the ID from the URL
-        const updatedData = req.body; // Get the updated user data from the request body
+        const userId = req.params.id;
+        const updatedData = req.body;
 
-        const updatedUser = await User.findByIdAndUpdate(userId, updatedData, { new: true }); // Update the user and return the new data
+        const updatedUser = await User.findByIdAndUpdate(userId, updatedData, { new: true });
 
         if (!updatedUser) {
-            return res.status(404).send("User not found"); // If no user is found, send a 404 error
+            return res.status(404).send("User not found");
         }
 
-        res.json(updatedUser); // Send back the updated user details
+        res.json(updatedUser);
     } catch (error) {
-        res.status(500).send("Error updating user"); // If there's an error, send a 500 status
+        res.status(500).send("Error updating user");
     }
 });
 
@@ -119,13 +90,14 @@ router.get('/user-count', async (req, res) => {
 
 // Route to search for users
 router.get('/search', async (req, res) => {
-    const { query } = req.query; // Get search query from the request
+    const { query } = req.query;
 
     try {
         const users = await User.find({
             $or: [
-                { name: { $regex: query, $options: 'i' } }, // Search by name
-                { email: { $regex: query, $options: 'i' } } // Search by email
+                { firstName: { $regex: query, $options: 'i' } },
+                { lastName: { $regex: query, $options: 'i' } },
+                { email: { $regex: query, $options: 'i' } }
             ]
         });
 
@@ -135,10 +107,92 @@ router.get('/search', async (req, res) => {
     }
 });
 
+// Route to get all requests
+router.get('/requests', async (req, res) => {
+    try {
+        const requests = await Request.find()
+            .populate('mentee', 'firstName lastName email')
+            .populate('mentor', 'firstName lastName email');
+        res.json(requests);
+    } catch (error) {
+        res.status(500).send("Error retrieving requests");
+    }
+});
+
+// Route to delete a request
+router.delete('/requests/:id', async (req, res) => {
+    try {
+        const requestId = req.params.id;
+        const deletedRequest = await Request.findByIdAndDelete(requestId);
+
+        if (!deletedRequest) {
+            return res.status(404).send("Request not found");
+        }
+
+        res.send("Request deleted successfully");
+    } catch (error) {
+        res.status(500).send("Error deleting request");
+    }
+});
+
+// Route to get all notifications
+router.get('/notifications', async (req, res) => {
+    try {
+        const notifications = await Notification.find();
+        res.json(notifications);
+    } catch (error) {
+        res.status(500).send("Error retrieving notifications");
+    }
+});
+
+// Route to delete a notification by ID
+router.delete('/notifications/:id', async (req, res) => {
+    try {
+        const notificationId = req.params.id;
+        const deletedNotification = await Notification.findByIdAndDelete(notificationId);
+
+        if (!deletedNotification) {
+            return res.status(404).send("Notification not found");
+        }
+
+        res.send("Notification deleted successfully");
+    } catch (error) {
+        res.status(500).send("Error deleting notification");
+    }
+});
+
+// Route to get all reviews
+router.get('/reviews', async (req, res) => {
+    try {
+        const reviews = await Review.find()
+            .populate('mentor', 'firstName lastName email')
+            .populate('mentee', 'firstName lastName email');
+        res.json(reviews);
+    } catch (error) {
+        res.status(500).send("Error retrieving reviews");
+    }
+});
+
+// Route to delete a review by ID
+router.delete('/reviews/:id', async (req, res) => {
+    try {
+        const reviewId = req.params.id;
+        const deletedReview = await Review.findByIdAndDelete(reviewId);
+
+        if (!deletedReview) {
+            return res.status(404).send("Review not found");
+        }
+
+        res.send("Review deleted successfully");
+    } catch (error) {
+        res.status(500).send("Error deleting review");
+    }
+});
+
 // Route to get all unique roles
 router.get('/roles', async (req, res) => {
     try {
-        const roles = await User.distinct('role'); // Get unique roles from the User collection
+        const roles = await User.distinct('role');
         res.json(roles);
     } catch (error) {
         res.status(500).send("Error retrieving roles");
@@ -146,4 +200,3 @@ router.get('/roles', async (req, res) => {
 });
 
 module.exports = router;
-
